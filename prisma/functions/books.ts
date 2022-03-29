@@ -1,9 +1,10 @@
 import { PrismaClient, Book } from '@prisma/client';
+import { BookWithAuthor } from '../../types';
 
 const prisma = new PrismaClient();
 
 /* 本リストを取得 */
-export const getBooks = async (): Promise<Book[]> => {
+export const prismaBookFindMany = async (): Promise<BookWithAuthor[]> => {
   const books = await prisma.book.findMany({
     /* 著者の情報も取得する */
     include: {
@@ -14,7 +15,9 @@ export const getBooks = async (): Promise<Book[]> => {
 };
 
 /* 本を新規保存 */
-export const createBook = async (param: Omit<Book, 'id'>): Promise<Book> => {
+export const prismaBookCreate = async (
+  param: Omit<Book, 'id'>,
+): Promise<Book> => {
   const books = await prisma.book.create({
     data: param,
   });
@@ -22,12 +25,22 @@ export const createBook = async (param: Omit<Book, 'id'>): Promise<Book> => {
 };
 
 /* 本を更新 */
-export const updateBook = async (param: Book): Promise<Book> => {
+export const prismaBookUpdate = async (param: Book): Promise<Book> => {
   const books = await prisma.book.update({
     where: {
       id: param.id,
     },
     data: param,
+  });
+  return books;
+};
+
+/* 本を削除 */
+export const prismaBookDelete = async (id: number): Promise<Book> => {
+  const books = await prisma.book.delete({
+    where: {
+      id,
+    },
   });
   return books;
 };
