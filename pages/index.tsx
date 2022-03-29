@@ -72,8 +72,10 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div>
-      <h1>Lesson PlanetScale with Prisma</h1>
+    <div className='p-5'>
+      <h1 className='text-2xl border-b pb-1 px-8'>
+        Lesson PlanetScale with Prisma
+      </h1>
 
       <div className='p-4 space-y-2 w-60'>
         <h2 className='text-xl'>本を登録する</h2>
