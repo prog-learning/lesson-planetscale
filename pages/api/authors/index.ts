@@ -3,31 +3,29 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   prismaAuthorCreate,
   prismaAuthorFindMany,
-} from '../../../prisma/functions/authors';
+} from 'prisma/functions/authors';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Author[] | Author>,
 ) {
-  const { method } = req;
+  const { method, body } = req;
 
-  if (method === 'GET') {
-    const authors = await prismaAuthorFindMany();
+  switch (method) {
+    case 'GET':
+      const authors = await prismaAuthorFindMany();
+      res.status(200).json(authors);
+      break;
 
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(authors);
+    case 'POST':
+      if (!body) return res.status(400).end('No body');
+      const params = JSON.parse(body) as Omit<Author, 'id'>;
+      const author = await prismaAuthorCreate(params);
+      res.status(200).json(author);
+      break;
+
+    default:
+      res.setHeader('Allow', ['GET', 'POST']);
+      res.status(405).end(`Method ${method} Not Allowed`);
   }
-
-  if (method === 'POST') {
-    console.log('authors POST');
-    const json = req.body;
-    const params = JSON.parse(json) as Omit<Author, 'id'>;
-    const author = await prismaAuthorCreate(params);
-
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(author);
-  }
-
-  res.setHeader('Allow', ['GET', 'POST']);
-  res.status(405).end(`Method ${method} Not Allowed`);
 }

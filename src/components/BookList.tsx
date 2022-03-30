@@ -24,11 +24,7 @@ export const BookList: VFC<Props> = () => {
     isLoading: isLoadingBooks,
     refetch: refetchBooks,
   } = useBooks();
-  const {
-    authors,
-    isLoading: isLoadingAuthors,
-    refetch: refetchAuthors,
-  } = useAuthors();
+  const { authors } = useAuthors();
 
   /* Formの入力状態 */
   const [newBookState, setNewBookState] =
@@ -112,8 +108,7 @@ export const BookList: VFC<Props> = () => {
   /* 本の削除 */
   const deleteBookDeleteHandler = async (id: number) => {
     try {
-      const response = await deleteBook(id);
-      console.log(response);
+      await deleteBook(id);
       refetchBooks();
     } catch (e) {
       console.error(e);

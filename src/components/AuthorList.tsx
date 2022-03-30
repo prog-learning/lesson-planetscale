@@ -16,7 +16,6 @@ export const AuthorList: VFC = () => {
     isLoading: isLoadingAuthors,
     refetch: refetchAuthors,
   } = useAuthors();
-  console.log(authors);
 
   const [newAuthorState, setNewAuthorState] =
     useState<Omit<Author, 'id'>>(initialAuthorState);
@@ -86,9 +85,14 @@ export const AuthorList: VFC = () => {
 
   /* 著者の削除 */
   const deleteAuthorHandler = async (id: number) => {
+    const haveBooks = authors?.find((author) => author.id === id)?.books.length;
+    if (haveBooks) {
+      alert('⚠この著者には本があります。');
+      return;
+    }
+
     try {
-      const response = await deleteAuthor(id);
-      console.log(response);
+      await deleteAuthor(id);
       refetchAuthors();
     } catch (e) {
       console.error(e);

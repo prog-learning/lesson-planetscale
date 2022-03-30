@@ -1,35 +1,31 @@
 import { Book } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  prismaBookCreate,
-  prismaBookFindMany,
-} from '../../../prisma/functions/books';
-import { BookWithAuthor } from '../../../types';
+import { prismaBookCreate, prismaBookFindMany } from 'prisma/functions/books';
+import { BookWithAuthor } from 'types';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<BookWithAuthor[] | Book>,
 ) {
-  const { method } = req;
+  const { method, body } = req;
 
-  if (method === 'GET') {
-    const books = await prismaBookFindMany();
+  switch (method) {
+    case 'GET':
+      const books = await prismaBookFindMany();
+      res.status(200).json(books);
+      break;
 
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(books);
+    case 'POST':
+      if (!body) return res.status(400).end('No body');
+      const params = JSON.parse(body) as Omit<Book, 'id'>;
+      params.price = Number(params.price);
+      params.authorId = Number(params.authorId);
+      const book = await prismaBookCreate(params);
+      res.status(200).json(book);
+      break;
+
+    default:
+      res.setHeader('Allow', ['GET', 'POST']);
+      res.status(405).end(`Method ${method} Not Allowed`);
   }
-
-  if (method === 'POST') {
-    const json = req.body;
-    const params = JSON.parse(json) as Omit<Book, 'id'>;
-    params.price = Number(params.price);
-    params.authorId = Number(params.authorId);
-    const book = await prismaBookCreate(params);
-
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(book);
-  }
-
-  res.setHeader('Allow', ['GET', 'POST']);
-  res.status(405).end(`Method ${method} Not Allowed`);
 }

@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   prismaAuthorDelete,
   prismaAuthorUpdate,
-} from '../../../prisma/functions/authors';
+} from 'prisma/functions/authors';
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,25 +12,26 @@ export default async function handler(
   const {
     method,
     query: { id },
+    body,
   } = req;
 
-  if (method === 'PUT') {
-    const json = req.body;
-    const params = JSON.parse(json) as Author;
-    const author = await prismaAuthorUpdate(params);
+  switch (method) {
+    case 'PUT':
+      if (!body) return res.status(400).end('No body');
+      const params = JSON.parse(body) as Author;
+      const updatedAuthor = await prismaAuthorUpdate(params);
 
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(author);
+      res.status(200).json(updatedAuthor);
+      break;
+
+    case 'DELETE':
+      const authorId = Number(typeof id === 'string' ? id : id[0]);
+      const deletedAuthor = await prismaAuthorDelete(authorId);
+      res.status(200).json(deletedAuthor);
+      break;
+
+    default:
+      res.setHeader('Allow', ['PUT', 'DELETE']);
+      res.status(405).end(`Method ${method} Not Allowed`);
   }
-
-  if (method === 'DELETE') {
-    const authorId = Number(typeof id === 'string' ? id : id[0]);
-    const author = await prismaAuthorDelete(authorId);
-
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(author);
-  }
-
-  res.setHeader('Allow', ['PUT', 'DELETE']);
-  res.status(405).end(`Method ${method} Not Allowed`);
 }
