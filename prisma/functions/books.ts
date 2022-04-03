@@ -1,7 +1,6 @@
-import { PrismaClient, Book } from '@prisma/client';
+import { prisma } from './prisma';
+import { Book } from '@prisma/client';
 import { BookWithAuthor } from '../../types';
-
-const prisma = new PrismaClient();
 
 /* 本リストを取得 */
 export const prismaBookFindMany = async (): Promise<BookWithAuthor[]> => {

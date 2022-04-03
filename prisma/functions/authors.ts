@@ -1,6 +1,5 @@
-import { PrismaClient, Author } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
+import { Author } from '@prisma/client';
 
 /* 著者リストを取得 */
 export const prismaAuthorFindMany = async (): Promise<Author[]> => {
