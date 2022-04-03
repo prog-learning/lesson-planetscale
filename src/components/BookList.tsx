@@ -2,11 +2,12 @@ import { useMemo, useState, VFC } from 'react';
 import { useAuthors } from 'src/hooks/useAuthors';
 import { useBooks } from 'src/hooks/useBooks';
 import { createBook, deleteBook, updateBook } from 'src/libs/api/books';
-import { Book } from 'types';
+import { Book, BookWithAuthor } from 'types';
 import { Button } from './@base/Button';
 import { Input } from './@base/Input';
 import { Modal } from './@base/Modal';
 import { Select } from './@base/Select';
+import { Snackbar } from './@base/Snackbar';
 
 type Props = {};
 
@@ -35,6 +36,7 @@ export const BookList: VFC<Props> = () => {
   });
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   /* Select Options */
   const authorOptions = useMemo(() => {
@@ -53,9 +55,16 @@ export const BookList: VFC<Props> = () => {
     setNewBookState(initialBookState);
   };
 
-  const openEditModal = (book: Book) => {
+  const openEditModal = (book: BookWithAuthor) => {
     setIsOpenEditModal(true);
     setEditBookState(book);
+    // setEditBookState({
+    //   id: book.id,
+    //   title: book.title,
+    //   description: book.description,
+    //   price: book.price,
+    //   authorId: book.author.id,
+    // });
   };
   const closeEditModal = () => {
     setIsOpenEditModal(false);
@@ -84,8 +93,8 @@ export const BookList: VFC<Props> = () => {
       setNewBookState(initialBookState);
       refetchBooks();
       setIsOpenCreateModal(false);
-    } catch (e) {
-      console.error(e);
+    } catch (error: any) {
+      setErrorMessages([error]);
     }
   };
 
@@ -100,8 +109,8 @@ export const BookList: VFC<Props> = () => {
       });
       refetchBooks();
       setIsOpenEditModal(false);
-    } catch (e) {
-      console.error(e);
+    } catch (error: any) {
+      setErrorMessages([error]);
     }
   };
 
@@ -117,6 +126,12 @@ export const BookList: VFC<Props> = () => {
 
   return (
     <div>
+      {/* Error Message */}
+      <Snackbar
+        isOpen={errorMessages.length > 0}
+        closeHandler={() => setErrorMessages([])}
+        messages={errorMessages}
+      />
       <div className='p-4 space-y-3 bg-slate-200 rounded'>
         <div className='flex justify-between gap-4'>
           <h2 className='text-xl'>本一覧</h2>
@@ -193,6 +208,7 @@ export const BookList: VFC<Props> = () => {
           </div>
         </div>
       </Modal>
+
       {/* 編集Modal */}
       <Modal isOpen={isOpenEditModal} closeHandler={closeEditModal}>
         <div className='p-4 space-y-2 w-60 bg-slate-200 rounded'>
